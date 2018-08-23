@@ -1,0 +1,76 @@
+Issued by: Giordan Pretelin
+Analytics & Insights Mexico
+
+
+Quick guide: 
+Package used to develop script: Anaconda.
+IDE used for scripting: Spyder (contained in anaconda).
+libraries used for script: pandas, matplotlib, seaborn (contained in Anaconda).
+
+The intention of the following script is to develop an algorythm able to predict if a
+candidate will pass the initial interview or not. This will allow the recruitment team to 
+bypass this step which was detected to be the one that would bring the most benefits from
+predicting to the organization and the team after assessment. 
+
+Script was developed following the DataCamp course "HR Analytics in Python: Predicting Employee Churn"
+available in the following link: https://campus.datacamp.com/courses/hr-analytics-in-python-predicting-employee-churn/
+
+Current script was followed until part 2 of the course: Predicting employee turnover. It is required to follow training
+and complete the script.As of now it performs only the cleanup and data prep process required for the next steps
+
+Current script might be able to be optimized by categorizing all universities into two categories: Top and others
+(HR recruitment team should be able to assess this), same case for majors. This would reduce the amount of data columns
+and allow the heatmap visualization currently provided to be more meaningful. 
+
+Script: 
+
+
+
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug 15 17:25:49 2018
+
+@author: pretelin.g.1
+"""
+
+! dir
+% cd Documents/
+! dir
+% cd "Recruitment Design"
+! dir
+import pandas as pd
+data = pd.read_csv("Interviews_Data4.txt")
+print(data.info())
+print(data.head())
+print(data.Level.unique())
+data.Level = data.Level.astype('category')
+data.Level.cat.reorder_categories(['Graduate','Post'])
+data.Level = data.Level.cat.codes
+print(data.Gender.unique())
+data = data[data.Gender != "I prefer not to answer"]
+print(data.Gender.unique())
+genders = pd.get_dummies(data.Gender)
+print(genders.head())
+data = data.drop("Gender", axis = 1)
+data = data.join(genders)
+data = data.drop("Male", axis = 1)
+data.info()
+print(data.Institution.unique())
+institutions = pd.get_dummies(data.Institution)
+print(institutions.head())
+institutions = institutions.drop("Universidad del Valle de México", axis = 1)
+data = data.drop("Institution", axis = 1)
+data = data.join(institutions)
+print(data.Major.unique())
+majors = pd.get_dummies(data.Major)
+majors = majors.drop("Otros", axis =1)
+data = data.drop("Major", axis = 1)
+data = data.join(majors)
+n_candidates = len(data)
+data.columns = data.columns.str.replace(' ','_')
+print(data.Passed_Initial_Interview.value_counts())
+print(data.Passed_Initial_Interview.value_counts()/n_candidates*100)
+import matplotlib.pyplot as plt
+corr_matrix = data.corr()
+sns.heatmap(corr_matrix) 
+plt.show()
